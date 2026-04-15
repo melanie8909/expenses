@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的雲端記帳本</title>
+    <title>我的雲端記帳本 V2</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -14,6 +14,7 @@
             --bg-color: #f5f7fa;
             --text-color: #333;
             --card-bg: #ffffff;
+            --accent-color: #ff9a9e;
         }
 
         body {
@@ -35,56 +36,48 @@
             padding: 30px;
             border-radius: 24px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .header {
             text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h2 { margin: 5px 0; font-weight: 700; color: #444; }
+
+        /* 快捷按鈕樣式 */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
             margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .header i {
-            font-size: 40px;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .header h2 {
-            margin: 0;
-            font-weight: 700;
-            color: #444;
-            letter-spacing: 1px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #666;
+        .quick-btn {
+            background: #f0f2f5;
+            border: 2px solid transparent;
+            padding: 8px 15px;
+            border-radius: 50px;
             font-size: 14px;
-        }
-
-        .input-wrapper {
-            position: relative;
+            font-weight: 500;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
+            gap: 5px;
         }
 
-        .input-wrapper i {
-            position: absolute;
-            left: 12px;
-            color: #aaa;
-            transition: 0.3s;
-        }
+        .quick-btn:hover { background: #e4e6e9; }
+        .quick-btn:active { transform: scale(0.95); border-color: var(--primary-color); }
+        .quick-btn i { color: var(--primary-color); }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: #666; font-size: 14px; }
+
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-wrapper i { position: absolute; left: 12px; color: #aaa; }
 
         input, select {
             width: 100%;
@@ -92,24 +85,15 @@
             border: 2px solid #eee;
             border-radius: 12px;
             font-size: 16px;
-            transition: all 0.3s ease;
             outline: none;
             box-sizing: border-box;
         }
 
-        input:focus, select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 8px rgba(79, 172, 254, 0.2);
-        }
+        input:focus, select:focus { border-color: var(--primary-color); }
 
-        input:focus + i, select:focus + i {
-            color: var(--primary-color);
-        }
-
-        button {
+        button#submitBtn {
             width: 100%;
             padding: 14px;
-            margin-top: 10px;
             border: none;
             border-radius: 12px;
             background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
@@ -117,30 +101,12 @@
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
         }
 
-        button:active {
-            transform: scale(0.98);
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .footer-note {
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            margin-top: 20px;
-        }
-
-        /* 成功提示動畫 */
         .success-overlay {
             display: none;
             position: fixed;
@@ -151,7 +117,6 @@
             color: white;
             padding: 10px 25px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             z-index: 1000;
         }
     </style>
@@ -159,13 +124,25 @@
 <body>
 
     <div id="successMsg" class="success-overlay">
-        <i class="fas fa-check-circle"></i> 紀錄已同步至 Google Sheets
+        <i class="fas fa-check-circle"></i> 紀錄成功！
     </div>
 
     <div class="container">
         <div class="header">
-            <i class="fas fa-wallet"></i>
-            <h2>每日收支紀錄</h2>
+            <i class="fas fa-bolt" style="color: #f1c40f; font-size: 24px;"></i>
+            <h2>快速記帳</h2>
+        </div>
+
+        <div class="quick-actions">
+            <button type="button" class="quick-btn" onclick="quickFill('三餐', '餐飲美食')">
+                <i class="fas fa-utensils"></i> 三餐
+            </button>
+            <button type="button" class="quick-btn" onclick="quickFill('零食', '餐飲美食')">
+                <i class="fas fa-cookie-bite"></i> 零食
+            </button>
+            <button type="button" class="quick-btn" onclick="quickFill('計程車', '交通出行')">
+                <i class="fas fa-taxi"></i> 計程車
+            </button>
         </div>
 
         <form id="expenseForm">
@@ -173,27 +150,25 @@
                 <label>消費項目</label>
                 <div class="input-wrapper">
                     <i class="fas fa-tag"></i>
-                    <input type="text" id="item" placeholder="例如：7-11 咖啡" required>
+                    <input type="text" id="item" placeholder="填寫項目" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>類別名稱</label>
+                <label>類別</label>
                 <div class="input-wrapper">
                     <i class="fas fa-layer-group"></i>
                     <select id="category">
                         <option value="餐飲美食">餐飲美食</option>
                         <option value="交通出行">交通出行</option>
                         <option value="生活用品">生活用品</option>
-                        <option value="娛樂休閒">娛樂休閒</option>
-                        <option value="居家房租">居家房租</option>
                         <option value="其他支出">其他支出</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>金額 (TWD)</label>
+                <label>金額</label>
                 <div class="input-wrapper">
                     <i class="fas fa-dollar-sign"></i>
                     <input type="number" id="amount" placeholder="0" inputmode="numeric" required>
@@ -201,10 +176,10 @@
             </div>
 
             <div class="form-group">
-                <label>備註資訊</label>
+                <label>備註</label>
                 <div class="input-wrapper">
                     <i class="fas fa-comment-dots"></i>
-                    <input type="text" id="note" placeholder="可選填...">
+                    <input type="text" id="note" placeholder="可選填">
                 </div>
             </div>
 
@@ -212,24 +187,27 @@
                 <i class="fas fa-paper-plane"></i> <span>確認送出</span>
             </button>
         </form>
-
-        <div class="footer-note">
-            雲端數據自動同步中
-        </div>
     </div>
 
     <script>
-        // ！！！請將下方網址替換成你的 Google Apps Script 部署網址 ！！！
+        // ！！！請替換成你的 Google Apps Script 部署網址 ！！！
         const webAppUrl = 'https://script.google.com/macros/s/AKfycbxYYnLHDIHjoJBUUotKR67TOP9bYAfYVWGwHmn1kRF_s1rliB0Rn_Cxhntnh_pQf5Uu/exec';
+
+        // 快捷填入函式
+        function quickFill(itemName, categoryName) {
+            document.getElementById('item').value = itemName;
+            document.getElementById('category').value = categoryName;
+            // 自動聚焦到金額欄位，方便直接輸入數字
+            document.getElementById('amount').focus();
+        }
 
         document.getElementById('expenseForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const btnText = btn.querySelector('span');
-            const successMsg = document.getElementById('successMsg');
             
             btn.disabled = true;
-            btnText.innerText = '傳送中...';
+            btnText.innerText = '同步中...';
 
             const params = new URLSearchParams();
             params.append('item', document.getElementById('item').value);
@@ -242,16 +220,15 @@
                 mode: 'no-cors',
                 body: params
             }).then(() => {
-                // 成功動畫回饋
+                const successMsg = document.getElementById('successMsg');
                 successMsg.style.display = 'block';
-                setTimeout(() => { successMsg.style.display = 'none'; }, 3000);
+                setTimeout(() => { successMsg.style.display = 'none'; }, 2500);
                 
                 document.getElementById('expenseForm').reset();
                 btn.disabled = false;
                 btnText.innerText = '確認送出';
             }).catch(err => {
-                console.error(err);
-                alert('傳送失敗，請確認網址或網路狀態');
+                alert('連線失敗');
                 btn.disabled = false;
                 btnText.innerText = '確認送出';
             });
